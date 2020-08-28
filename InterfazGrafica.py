@@ -92,7 +92,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                 html.Div(id='GuardarDiv', style={'paddingBottom':'30px', 'textAlign': 'center', 'color': colors['text']}, children=[
                 html.Button('Guardar Datos', id='guardar', n_clicks=0),
                 html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
-                html.Div(id='indicativoGuardar', children=['No Guardando']),
+                html.Div(id='indicativoGuardar', children=['No guardando']),
                 dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')]),
                 html.H2('Válvulas', style={'textAlign': 'center', 'color': colors['text']}),
                 html.Div(dcc.Graph(id='live-update-graph2')),
@@ -112,7 +112,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                                 html.Label(id='Razon2Label',children='Razon 2'),
                                 dcc.Slider(id='Razon2', min=0, max=1, step=0.05, value=0.6)])
                         ]),
-                        dcc.RadioItems(id='TipoManual', options=[{'label': 'Sinusoide', 'value': 'sinusoide'}, {'label':'Valor Fijo', 'value':'fijo'}], value='sinusoide'),
+                        dcc.RadioItems(id='TipoManual', options=[{'label': 'Sinusoide', 'value': 'sinusoide'}, {'label':'Valor Fijo', 'value':'fijo'}], value='fijo'),
                         html.H4('Sinusoide'),
                         html.Div(id='Sliders1', className='row', children=[
                             html.Div(id='Frec', style={'paddingBottom':'50px'}, className='six columns', children=[
@@ -123,8 +123,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                             html.Div(id='Fase', style={'paddingBottom':'50px'}, className='six columns', children=[
                                 html.Label(id='3', children='Fase'), dcc.Slider(id='FaseSlider',min=0, max=6.28, step=0.1, value=0, vertical=False)]),
                             html.Div(id='Offset', className='six columns', children=[
-                                html.Label(id='4', children='Offset'), dcc.Slider(id='OffsetSlider',min=-1, max=1, step=0.05, value=0, vertical=False)])])
-                        ,html.H4('Valor fijo'),
+                                html.Label(id='4', children='Offset'), dcc.Slider(id='OffsetSlider',min=1, max=3, step=0.05, value=0, vertical=False)])]),
+                        html.H4('Valor fijo'),
                         html.Div(style={'textAlign':'center', 'paddingBottom':'10px'},children=[dcc.Input(id='ManualFijo',placeholder='Ingrese un valor entre -1 y 1 ...', type='text', value='0')])
                     ]),
                     html.Div(id='Automatico', className='six columns', style={'color': colors['text'], 'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#1F7A8C'}, children=[
@@ -342,7 +342,7 @@ def controller_output(heights, choice, manual_type, freq, amp, offset, phase, fi
                  'v1': v1, 'v2': v2, 'modo': '{}'.format(choice), 'sp1': float(SPT1), 'sp2': float(SPT2),
                  'ki': float(ki),'kd': float(kd),'kp': float(kp),'kw': float(kw)})
 
-    elif saving == 'No Guardando' and system.memory != []:
+    elif saving == 'No guardando' and system.memory != []:
         system.memory = pd.DataFrame(system.memory)
         system.memory = system.memory.set_index('time')
         if formatting == 'csv':
@@ -378,4 +378,4 @@ def controller_output(heights, choice, manual_type, freq, amp, offset, phase, fi
 
     return fig
 
-app.run_server()
+app.run_server(debug=False)
