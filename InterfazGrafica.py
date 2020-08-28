@@ -77,90 +77,88 @@ cliente = Cliente("opc.tcp://localhost:4840/freeopcua/server/", suscribir_evento
 cliente.conectar()
 
 # Dash settings
-colors = {'background': '#111111','text': '#7FDBFF'}
+colors = {'background': '#022B3A','text': '#f1faee'}
 fonts = {'text': 'Helvetica'}
 frequency = 1
 
 # Dash layout
 app = dash.Dash()
-app.layout = html.Div(style={"display": "flex", "flex-direction": "column"}, children=[
-                html.H1(children='Aplicación de Control', style={'textAlign': 'center','color': colors['text'], 'font-family': fonts['text']}),
+app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-family': fonts['text']}, children=[
+                html.H1(children='Aplicación de Control', style={'textAlign': 'center','color': '#022B3A', 'paddingTop': '20px', 'paddingBottom': '10px', 'backgroundColor': '#FFFFFF'}),
                 dcc.Interval(id='interval-component', interval=int(1/frequency*1000), n_intervals=0),
-                dcc.Tabs(id='Tabs', children=[
-                    dcc.Tab(label='Tanques', children=[html.Div(id='live-update-text1', style={'padding':'15px', 'color': colors['text']}),
-                        dcc.Graph(id='live-update-graph1'), html.Div(id='intermediate', style={'display':'none'}),
-                        html.Div(id='GuardarDiv', style={'paddingBottom':'30px', 'textAlign': 'center'}, children=[
-                        html.Button('Guardar Datos', id='guardar', n_clicks=0),
-                        html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
-                        html.Div(id='indicativoGuardar', children=['No Guardando']),
-                        dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')])
+                html.H2('Tanques', style={'textAlign': 'center', 'color': colors['text']}),
+                html.Div(id='live-update-text1', style={'textAlign': 'center', 'padding':'15px', 'color': colors['text']}),
+                dcc.Graph(id='live-update-graph1'), html.Div(id='intermediate', style={'display':'none'}),
+                html.Div(id='GuardarDiv', style={'paddingBottom':'30px', 'textAlign': 'center', 'color': colors['text']}, children=[
+                html.Button('Guardar Datos', id='guardar', n_clicks=0),
+                html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
+                html.Div(id='indicativoGuardar', children=['No Guardando']),
+                dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')]),
+                html.H2('Válvulas', style={'textAlign': 'center', 'color': colors['text']}),
+                html.Div(dcc.Graph(id='live-update-graph2')),
+                html.Div(id='Modo',style={'textAlign': 'center', 'color': colors['text']}, children=[
+                    html.H2('Controlador'),
+                    dcc.RadioItems(id='Eleccion',options=[{'label': 'Manual', 'value': 'Manual'}, {'label': 'Automático', 'value': 'Automatico'}], value='Manual'),
+                    html.Div(id='MyDiv')]),
+                html.Div(id='Modos',className='row' ,children=[
+                    html.Div(id='Manual', className='six columns', style={'color': colors['text'], 'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#1F7A8C'}, children=[
+                        html.H3('Modo Manual', style={'textAlign': 'center'}),
+                        html.H4('Valor de las Razones'),
+                        html.Div(id='RazonesDiv', className='row', children=[
+                            html.Div(id='Razon1Div', style={'paddingBottom':'50px'},className='six columns', children=[
+                                html.Label(id='Razon1Label', children='Razon 1'),
+                                dcc.Slider(id='Razon1', min=0, max=1, step=0.05, value=0.7)]),
+                            html.Div(id='Razon2Div', style={'paddingBottom':'50px'}, className='six columns', children=[
+                                html.Label(id='Razon2Label',children='Razon 2'),
+                                dcc.Slider(id='Razon2', min=0, max=1, step=0.05, value=0.6)])
                         ]),
-                    dcc.Tab(label='Controlador', children=[
-                        html.Div(dcc.Graph(id='live-update-graph2')),
-                        html.Div(id='Modo',style={'textAlign': 'center','color': colors['text']}, children=[
-                            html.H2('Modo del controlador'),
-                            dcc.RadioItems(id='Eleccion',options=[{'label': 'Modo Manual', 'value': 'Manual'}, {'label': 'Modo Automático', 'value': 'Automatico'}], value='Manual'),
-                            html.Div(id='MyDiv')]),
-                        html.Div(id='Modos',className='row' ,children=[
-                            html.Div(id='Manual', className='six columns', style={'color': colors['text'], 'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#B8860B'}, children=[
-                                html.H3('Modo Manual', style={'textAlign': 'center'}),
-                                html.H4('Valor de las Razones'),
-                                html.Div(id='RazonesDiv', className='row', children=[
-                                    html.Div(id='Razon1Div', style={'paddingBottom':'50px'},className='six columns', children=[
-                                        html.Label(id='Razon1Label', children='Razon 1'),
-                                        dcc.Slider(id='Razon1', min=0, max=1, step=0.05, value=0.7)]),
-                                    html.Div(id='Razon2Div', style={'paddingBottom':'50px'}, className='six columns', children=[
-                                        html.Label(id='Razon2Label',children='Razon 2'),
-                                        dcc.Slider(id='Razon2', min=0, max=1, step=0.05, value=0.6)])
-                                ]),
-                                dcc.RadioItems(id='TipoManual', options=[{'label': 'Sinusoide', 'value': 'sinusoide'}, {'label':'Valor Fijo', 'value':'fijo'}], value='sinusoide'),
-                                html.H4('Sinusoide'),
-                                html.Div(id='Sliders1', className='row', children=[
-                                    html.Div(id='Frec', style={'paddingBottom':'50px'}, className='six columns', children=[
-                                        html.Label(id='1',children='Frec'), dcc.Slider(id='FrecSlider',min=frequency/25, max=frequency/2, step=0.1, value=frequency/4, vertical=False)]),
-                                    html.Div(id='Amp', className='six columns', children=[
-                                        html.Label(id='2', children='Amp'), dcc.Slider(id='AmpSlider',min=0.1, max=1, step=0.05, value=1, vertical=False)])]),
-                                html.Div(id='Sliders2', className='row', children=[
-                                    html.Div(id='Fase', style={'paddingBottom':'50px'}, className='six columns', children=[
-                                        html.Label(id='3', children='Fase'), dcc.Slider(id='FaseSlider',min=0, max=6.28, step=0.1, value=0, vertical=False)]),
-                                    html.Div(id='Offset', className='six columns', children=[
-                                        html.Label(id='4', children='Offset'), dcc.Slider(id='OffsetSlider',min=-1, max=1, step=0.05, value=0, vertical=False)])])
-                                ,html.H4('Valor fijo'),
-                                html.Div(style={'textAlign':'center', 'paddingBottom':'10px'},children=[dcc.Input(id='ManualFijo',placeholder='Ingrese un valor entre -1 y 1 ...', type='text', value='0')])
-                            ]),
-                            html.Div(id='Automatico', className='six columns', style={'color': colors['text'], 'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#B8860B'}, children=[
-                                html.H3('Modo Automatico', style={'textAlign': 'center'}),
-                                html.H4('SetPoints'),
-                                html.Div(id='SetPoints', className='row', children=[
-                                    html.Div(id='Tanque1', className='six columns', children=[
-                                        html.Label('SetPoint Tanque 1'), dcc.Input(id='SPT1', placeholder='Ingrese valor', type='text', value='25')]),
-                                    html.Div(id='Tanque2', className='six columns', children=[
-                                        html.Label('SetPoint Tanque 2'), dcc.Input(id='SPT2', placeholder='Ingrese valor', type='text', value='25')])
-                                ]),
-                                html.H4('Constantes del PID'),
-                                html.Div(id='constantes1', className='row', children=[
-                                    html.Div(id='P', className='six columns', children=[
-                                        html.Label('Proporcional'),
-                                        dcc.Input(id='kp',placeholder='Ingrese un valor', type='text', value='0.1')]),
-                                    html.Div(id='I', className='six columns', children=[
-                                        html.Label('Integral'),
-                                        dcc.Input(id='ki',placeholder='Ingrese un valor', type='text', value='0.1')])]),
-                                html.Div(id='constantes2', className='row',  style={'paddingBottom':'10px'},children=[
-                                    html.Div(id='D', className='six columns', children=[
-                                        html.Label('Derivativa'),
-                                        dcc.Input(id='kd',placeholder='Ingrese un valor', type='text', value='0')]),
-                                    html.Div(id='W', className='six columns', children=[
-                                        html.Label('Ansystem.ti wind-up'),
-                                        dcc.Input(id='kw',placeholder='Ingrese un valor', type='text', value='0')])])
-                            ])
+                        dcc.RadioItems(id='TipoManual', options=[{'label': 'Sinusoide', 'value': 'sinusoide'}, {'label':'Valor Fijo', 'value':'fijo'}], value='sinusoide'),
+                        html.H4('Sinusoide'),
+                        html.Div(id='Sliders1', className='row', children=[
+                            html.Div(id='Frec', style={'paddingBottom':'50px'}, className='six columns', children=[
+                                html.Label(id='1',children='Frec'), dcc.Slider(id='FrecSlider',min=frequency/25, max=frequency/2, step=0.1, value=frequency/4, vertical=False)]),
+                            html.Div(id='Amp', className='six columns', children=[
+                                html.Label(id='2', children='Amp'), dcc.Slider(id='AmpSlider',min=0.1, max=1, step=0.05, value=1, vertical=False)])]),
+                        html.Div(id='Sliders2', className='row', children=[
+                            html.Div(id='Fase', style={'paddingBottom':'50px'}, className='six columns', children=[
+                                html.Label(id='3', children='Fase'), dcc.Slider(id='FaseSlider',min=0, max=6.28, step=0.1, value=0, vertical=False)]),
+                            html.Div(id='Offset', className='six columns', children=[
+                                html.Label(id='4', children='Offset'), dcc.Slider(id='OffsetSlider',min=-1, max=1, step=0.05, value=0, vertical=False)])])
+                        ,html.H4('Valor fijo'),
+                        html.Div(style={'textAlign':'center', 'paddingBottom':'10px'},children=[dcc.Input(id='ManualFijo',placeholder='Ingrese un valor entre -1 y 1 ...', type='text', value='0')])
+                    ]),
+                    html.Div(id='Automatico', className='six columns', style={'color': colors['text'], 'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#1F7A8C'}, children=[
+                        html.H3('Modo Automatico', style={'textAlign': 'center'}),
+                        html.H4('SetPoints'),
+                        html.Div(id='SetPoints', className='row', children=[
+                            html.Div(id='Tanque1', className='six columns', children=[
+                                html.Label('SetPoint Tanque 1'), dcc.Input(id='SPT1', placeholder='Ingrese valor', type='text', value='25')]),
+                            html.Div(id='Tanque2', className='six columns', children=[
+                                html.Label('SetPoint Tanque 2'), dcc.Input(id='SPT2', placeholder='Ingrese valor', type='text', value='25')])
                         ]),
-                        html.Div(id='AlarmaContainer', style={'paddingTop': '20px', 'paddingBottom': '10px'}, children=[
-                            html.Div(id='Alarma', style={'backgroundColor': '#006400', 'width': '80%', 'height': '70px', 'paddingTop':'25px', 'margin':'auto','borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#B8860B'}, children=[
-                                html.H2(id='AlarmaTexto',style={'textAlign':'center', 'color': '#000000', 'paddingBottom':'40px'}, children=['Alarma Inactiva'])
-                            ])
-                        ])
+                        html.H4('Constantes del PID'),
+                        html.Div(id='constantes1', className='row', children=[
+                            html.Div(id='P', className='six columns', children=[
+                                html.Label('Proporcional'),
+                                dcc.Input(id='kp',placeholder='Ingrese un valor', type='text', value='0.1')]),
+                            html.Div(id='I', className='six columns', children=[
+                                html.Label('Integral'),
+                                dcc.Input(id='ki',placeholder='Ingrese un valor', type='text', value='0.1')])]),
+                        html.Div(id='constantes2', className='row',  style={'paddingBottom':'10px'},children=[
+                            html.Div(id='D', className='six columns', children=[
+                                html.Label('Derivativa'),
+                                dcc.Input(id='kd',placeholder='Ingrese un valor', type='text', value='0')]),
+                            html.Div(id='W', className='six columns', children=[
+                                html.Label('Anti wind-up'),
+                                dcc.Input(id='kw',placeholder='Ingrese un valor', type='text', value='0')])])
+                    ])
+                ]),
+                html.Div(id='AlarmaContainer', style={'paddingTop': '20px', 'paddingBottom': '10px'}, children=[
+                    html.Div(id='Alarma', style={'backgroundColor': '#006400', 'width': '80%', 'height': '70px', 'paddingTop':'25px', 'margin':'auto','borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#1F7A8C'}, children=[
+                        html.H2(id='AlarmaTexto',style={'textAlign':'center', 'color': colors['text'], 'paddingBottom':'40px'}, children=['Alarma Inactiva'])
                     ])
                 ])
+
 ]
 )
 
@@ -168,13 +166,13 @@ app.layout = html.Div(style={"display": "flex", "flex-direction": "column"}, chi
 @app.callback(Output('Alarma', 'style'), [Input('interval-component', 'n_intervals')])
 def alarm_color(n):
     if system.event_color != 0:
-        color = '#FF0000'
+        color = '#EF2D56'
     else:
-        color = '#006400'
+        color = '#8CD867'
     system.event_color = 0
 
-    style = {'backgroundColor': color, 'width': '80%', 'height': '70px', 'paddingTop': '25px', 'margin': 'auto',
-                'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#B8860B'}
+    style = {'backgroundColor': color, 'font-family': fonts['text'], 'color': colors['text'],  'width': '80%', 'height': '70px', 'paddingTop': '25px', 'margin': 'auto',
+                'borderStyle': 'solid', 'borderWidth': '5px', 'borderColor': '#1F7A8C'}
     return style
 
 # alarm text callback function
@@ -207,7 +205,7 @@ def update_heights(n):
 @app.callback(Output('live-update-text1', 'children'), [Input('intermediate', 'children')])
 def update_text(heights):
     heights = json.loads(heights)
-    style = {'padding': '5px', 'fontSize': '16px', 'border': '2px solid powderblue'}
+    style = {'padding': '10px', 'fontSize': '16px'}#, 'border': '2px solid', 'borderColor': '#1F7A8C'}
     return [
         html.Span('Tanque 1: {}'.format(round(heights['h1'], 2)), style=style),
         html.Span('Tanque 2: {}'.format(round(heights['h2'], 2)), style=style),
