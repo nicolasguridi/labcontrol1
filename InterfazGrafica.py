@@ -83,7 +83,10 @@ fonts = {'text': 'Helvetica'}
 frequency = 1
 
 # Dash layout
-app = dash.Dash()
+# https://dash.plotly.com/layout
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-family': fonts['text']}, children=[
                 html.H1(children='Aplicación de Control', style={'textAlign': 'center','color': '#022B3A', 'paddingTop': '10px', 'paddingBottom': '20px', 'backgroundColor': '#FFFFFF'}),
                 dcc.Interval(id='interval-component', interval=int(1/frequency*1000), n_intervals=0),
@@ -104,43 +107,51 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                 html.Div(id='Modos',className='row' ,children=[
                     html.Div(id='Manual', className='six columns', style={'color': colors['text'], 'padding':'40px'}, children=[
                         html.H3('Modo Manual', style={'textAlign': 'center'}),
-                        html.H4('Valor de las Razones'),
+                        html.H4('Valores fijos de voltaje'),
+                        html.Div(id='ValvulasDiv', className='row', children=[
+                            html.Div(id='Valvula1Div', style={'paddingTop':'20px'},className='six columns', children=[
+                                html.Label(id='Valvula1Label', children='Valvula 1'),
+                                html.Br(),
+                                dcc.Slider(id='ManualFijo1', min=0, max=1, step=0.05, marks={0: '0', 1: '1'}, tooltip={'always_visible':False}, value=0.5)]),
+                            html.Div(id='Valvula2Div', style={'paddingTop':'20px'}, className='six columns', children=[
+                                html.Label(id='Valvula2Label',children='Valvula 2'),
+                                html.Br(),
+                                dcc.Slider(id='ManualFijo2', min=0, max=1, step=0.05, marks={0: '0', 1: '1'}, tooltip={'always_visible':False}, value=0.5)])
+                        ]),
+                        html.H4('Valores de las razones'),
                         html.Div(id='RazonesDiv', className='row', children=[
                             html.Div(id='Razon1Div', style={'paddingTop':'20px'},className='six columns', children=[
                                 html.Label(id='Razon1Label', children='Razon 1'),
                                 html.Br(),
-                                dcc.Slider(id='Razon1', min=0, max=1, step=0.05, value=0.7)]),
+                                dcc.Slider(id='Razon1', min=0, max=1, step=0.05, marks={0: '0', 1: '1'}, tooltip={'always_visible':False}, value=0.7)]),
                             html.Div(id='Razon2Div', style={'paddingTop':'20px'}, className='six columns', children=[
                                 html.Label(id='Razon2Label',children='Razon 2'),
                                 html.Br(),
-                                dcc.Slider(id='Razon2', min=0, max=1, step=0.05, value=0.6)])
-                        ]),
-                        html.H4('Valores fijos'),
-                        html.Div(style={'paddingBottom':'10px'},children=[
-                            html.Table([
-                                html.Tr([
-                                    html.Td('Valvula 1'),
-                                    html.Td(dcc.Input(id='ManualFijo1',placeholder='Ingrese un valor entre 0 y 1 ...', type='text', value='0.5'))
-                                ]),
-                                html.Tr([
-                                    html.Td('Valvula 2'),
-                                    html.Td(dcc.Input(id='ManualFijo2',placeholder='Ingrese un valor entre 0 y 1 ...', type='text', value='0.5'))
-                                ])
-                            ]),
+                                dcc.Slider(id='Razon2', min=0, max=1, step=0.05, marks={0: '0', 1: '1'}, tooltip={'always_visible':False}, value=0.6)])
                         ]),
                     ]),
                     html.Div(id='Automatico', className='six columns', style={'color': colors['text'], 'padding':'40px'}, children=[
                         html.H3('Modo Automatico', style={'textAlign': 'center'}),
                         html.H4('SetPoints'),
+                        html.Div(id='SetpointsDiv', className='row', children=[
+                            html.Div(id='Setpoint1Div', style={'paddingTop':'20px'}, children=[
+                                html.Label(id='Setpoint1Label', children='Setpoint 1'),
+                                html.Br(),
+                                dcc.Slider(id='SPT1', min=0, max=50, step=1, marks={5 * i: f'{5 * i}' for i in range(11)}, tooltip={'always_visible':False}, value=25)]),
+                            html.Div(id='Setpoint2Div', style={'paddingTop':'20px'}, children=[
+                                html.Label(id='Setpoint2Label',children='Setpoint 2'),
+                                html.Br(),
+                                dcc.Slider(id='SPT2', min=0, max=50, step=1, marks={5 * i: f'{5 * i}' for i in range(11)}, tooltip={'always_visible':False}, value=25)])
+                        ]),
                             html.Table([
-                                html.Tr([
-                                    html.Td('Set point Tanque 1'),
-                                    html.Td(dcc.Input(id='SPT1', placeholder='Ingrese valor', type='text', value='25'))
-                                ]),
-                                html.Tr([
-                                    html.Td('Set point Tanque 2'),
-                                    html.Td(dcc.Input(id='SPT2', placeholder='Ingrese valor', type='text', value='25'))
-                                ]), 
+                                # html.Tr([
+                                #     html.Td('Set point Tanque 1'),
+                                #     html.Td(dcc.Input(id='SPT1', placeholder='Ingrese valor', type='text', value='25'))
+                                # ]),
+                                # html.Tr([
+                                #     html.Td('Set point Tanque 2'),
+                                #     html.Td(dcc.Input(id='SPT2', placeholder='Ingrese valor', type='text', value='25'))
+                                # ]), 
                                 html.H4('Constantes del PID'),
                                 html.Tr([
                                     html.Td('Proporcional'),
@@ -263,6 +274,24 @@ def update_rate_1(value):
 @app.callback(Output('Razon2Label', 'children'), [Input('Razon2', 'value')])
 def update_rate_2(value):
     return f'Razon 2: {value}'
+
+# ratio 1 value callback function
+@app.callback(Output('Valvula1Label', 'children'), [Input('ManualFijo1', 'value')])
+def update_valve_1(value):
+    return f'Valvula 1: {value}'
+# ratio 2 value callback function
+@app.callback(Output('Valvula2Label', 'children'), [Input('ManualFijo2', 'value')])
+def update_valve_2(value):
+    return f'Valvula 2: {value}'
+
+# setpoint 1 value callback function
+@app.callback(Output('Setpoint1Label', 'children'), [Input('SPT1', 'value')])
+def update_setpoint_1(value):
+    return f'Setpoint 1: {value}'
+# setpoint 2 value callback function
+@app.callback(Output('Setpoint2Label', 'children'), [Input('SPT2', 'value')])
+def update_setpoint_2(value):
+    return f'Setpoint 2: {value}'
 
 
 # pid controller updating and output plotting
