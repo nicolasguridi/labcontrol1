@@ -48,8 +48,8 @@ class PID:
         pv = self.p + self.i + self.d
         if pv > self.v_max:
             v = self.v_max
-        elif pv < - self.v_max:
-            v = - self.v_max
+        elif pv < 0:
+            v = 0
         else:
             v = pv
         # update v delta

@@ -40,6 +40,11 @@ class System:
         # system pids initialization
         self.pid1 = PID()
         self.pid2 = PID()
+        # setpoints
+        self.spt1 = deque(maxlen=maxlen)
+        self.spt1.append(25)
+        self.spt2 = deque(maxlen=maxlen)
+        self.spt2.append(25)
         # saving memory
         self.memory = []
         self.ti = 0
@@ -49,6 +54,8 @@ class System:
         self.event_color = 0
         self.event_text = 0
         self.event_save = 0
+        
+        self.save_button = 'Guardar datos'
 
 # threads management
 class SubHandler(object):
@@ -82,6 +89,8 @@ colors = {'background': '#022B3A','text': '#f1faee'}
 fonts = {'text': 'Helvetica'}
 frequency = 1
 
+
+
 # Dash layout
 # https://dash.plotly.com/layout
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -94,8 +103,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                 html.Div(id='live-update-text1', style={'textAlign': 'center', 'padding':'15px', 'color': colors['text']}),
                 dcc.Graph(id='live-update-graph1'), html.Div(id='intermediate', style={'display':'none'}),
                 html.Div(id='GuardarDiv', style={'paddingBottom':'30px', 'textAlign': 'center', 'color': colors['text']}, children=[
-                html.Button('Guardar Datos', id='guardar', n_clicks=0),
-                html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
+                html.Button('Guardar datos / Dejar de guardar', id='guardar', n_clicks=0, className="button button-primary"),
+                # html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
                 html.Div(id='indicativoGuardar', children=['No guardando']),
                 dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')]),
                 html.H2('Válvulas', style={'textAlign': 'center', 'color': colors['text']}),
@@ -144,14 +153,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                                 dcc.Slider(id='SPT2', min=0, max=50, step=1, marks={5 * i: f'{5 * i}' for i in range(11)}, tooltip={'always_visible':False}, value=25)])
                         ]),
                             html.Table([
-                                # html.Tr([
-                                #     html.Td('Set point Tanque 1'),
-                                #     html.Td(dcc.Input(id='SPT1', placeholder='Ingrese valor', type='text', value='25'))
-                                # ]),
-                                # html.Tr([
-                                #     html.Td('Set point Tanque 2'),
-                                #     html.Td(dcc.Input(id='SPT2', placeholder='Ingrese valor', type='text', value='25'))
-                                # ]), 
                                 html.H4('Constantes del PID'),
                                 html.Tr([
                                     html.Td('Proporcional'),
@@ -204,13 +205,14 @@ def alarm_text(n):
     return res
 
 # save callback function
-@app.callback(Output('indicativoGuardar', 'children'), [Input('guardar', 'n_clicks'), Input('noguardar', 'n_clicks')])
-def save(n_clicks, no_guardar):
-    if system.event_save != n_clicks:
-        system.event_save = n_clicks
+@app.callback(Output('indicativoGuardar', 'children'), [Input('guardar', 'n_clicks')])
+def save(save_clicks):
+    if system.event_save % 2 != 0:
+        system.event_save = 0
         return 'Guardando'
     else:
-        return 'No Guardando'
+        system.event_save += 1
+        return 'No guardando'
 
 # heights update callback function
 @app.callback(Output('intermediate', 'children'), [Input('interval-component', 'n_intervals')])
@@ -240,11 +242,16 @@ def update_graph(heights):
     system.h3.append(heights['h3'])
     system.h4.append(heights['h4'])
 
+    system.spt1.append(system.spt1[-1])
+    system.spt2.append(system.spt2[-1])
+
     # make plot for every tank height
     plot1 = go.Scatter(x=list(system.ts), y=list(system.h1), name='Tanque 1', mode='lines+markers')
     plot2 = go.Scatter(x=list(system.ts), y=list(system.h2), name='Tanque 2', mode='lines+markers')
     plot3 = go.Scatter(x=list(system.ts), y=list(system.h3), name='Tanque 3', mode='lines+markers')
     plot4 = go.Scatter(x=list(system.ts), y=list(system.h4), name='Tanque 4', mode='lines+markers')
+    plot1ref = go.Scatter(x=list(system.ts), y=list(system.spt1), name='Referencia 1', mode='lines')
+    plot2ref = go.Scatter(x=list(system.ts), y=list(system.spt2), name='Referencia 2', mode='lines')
 
     # create figure to fit the four plots
     fig = plotly.tools.make_subplots(rows=2, cols=2, vertical_spacing=0.2,
@@ -259,7 +266,9 @@ def update_graph(heights):
     
     # set plot positions in figure
     fig.append_trace(plot1, 1, 1)
+    fig.append_trace(plot1ref, 1, 1)
     fig.append_trace(plot2, 1, 2)
+    fig.append_trace(plot2ref, 1, 2)
     fig.append_trace(plot3, 2, 1)
     fig.append_trace(plot4, 2, 2)
 
@@ -287,10 +296,12 @@ def update_valve_2(value):
 # setpoint 1 value callback function
 @app.callback(Output('Setpoint1Label', 'children'), [Input('SPT1', 'value')])
 def update_setpoint_1(value):
+    system.spt1.append(value)
     return f'Setpoint 1: {value}'
 # setpoint 2 value callback function
 @app.callback(Output('Setpoint2Label', 'children'), [Input('SPT2', 'value')])
 def update_setpoint_2(value):
+    system.spt2.append(value)
     return f'Setpoint 2: {value}'
 
 
