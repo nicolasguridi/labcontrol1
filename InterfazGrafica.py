@@ -102,11 +102,12 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                 html.H2('Tanques', style={'textAlign': 'center', 'color': colors['text']}),
                 html.Div(id='live-update-text1', style={'textAlign': 'center', 'padding':'15px', 'color': colors['text']}),
                 dcc.Graph(id='live-update-graph1'), html.Div(id='intermediate', style={'display':'none'}),
-                html.Div(id='GuardarDiv', style={'paddingBottom':'30px', 'textAlign': 'center', 'color': colors['text']}, children=[
+                html.Div(id='GuardarDiv', style={'textAlign': 'center', 'color': colors['text']}, children=[
                 html.Button('Guardar datos / Dejar de guardar', id='guardar', n_clicks=0, className="button button-primary"),
                 # html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
                 html.Div(id='indicativoGuardar', children=['No guardando']),
                 dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')]),
+                html.H2(id='AlarmaTexto', style={'backgroundColor': '#006400','textAlign':'center', 'color': colors['text'], 'padding':'35px', 'margin':'40px'}, children=['Alarma Inactiva']),
                 html.H2('Válvulas', style={'textAlign': 'center', 'color': colors['text']}),
                 html.Div(dcc.Graph(id='live-update-graph2')),
                 html.Div(id='Modo',style={'textAlign': 'center', 'color': colors['text']}, children=[
@@ -173,11 +174,11 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                             ]),
                     ])
                 ]),
-                html.Div(id='AlarmaContainer', style={'padding':'40px'}, children=[
-                    html.Div(id='Alarma', style={'backgroundColor': '#006400', 'width': '80%', 'height': '70px', 'margin':'auto'}, children=[
-                        html.H2(id='AlarmaTexto',style={'textAlign':'center', 'color': colors['text'], 'paddingBottom':'40px'}, children=['Alarma Inactiva'])
-                    ])
-                ])
+                # html.Div(id='AlarmaContainer', style={'padding':'40px'}, children=[
+                #     html.Div(id='Alarma', style={'backgroundColor': '#006400', 'width': '80%', 'height': '70px', 'margin':'auto'}, children=[
+                #         html.H2(id='AlarmaTexto',style={'textAlign':'center', 'color': colors['text'], 'paddingBottom':'40px'}, children=['Alarma Inactiva'])
+                #     ])
+                # ])
 
 ]
 )
@@ -198,9 +199,9 @@ def alarm_color(n):
 def alarm_text(n):
     if system.event_text != 0:
         mensaje = system.event_text.Message.Text.split(':')
-        res = 'Alarma Activa: {}: {}'.format(mensaje[1], round(float(mensaje[2]), 2))
+        res = 'Alarma activa: {}: {}'.format(mensaje[1], round(float(mensaje[2]), 2))
     else:
-        res = 'Alarma Inactiva'
+        res = 'Alarma inactiva'
     system.event_text = 0
     return res
 
