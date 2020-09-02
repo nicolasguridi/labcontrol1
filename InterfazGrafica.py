@@ -80,7 +80,7 @@ if not os.path.exists(directory):
 system = System()
 
 # initialize client
-cliente = Cliente("opc.tcp://localhost:4840/freeopcua/server/", suscribir_eventos=True, SubHandler=SubHandler)
+cliente = Cliente("opc.tcp://localhost:4840/freeopcua/server/", SubHandler=SubHandler)
 cliente.conectar()
 
 # Dash settings
@@ -103,7 +103,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                 html.Div(id='live-update-text1', style={'textAlign': 'center', 'padding':'15px', 'color': colors['text']}),
                 dcc.Graph(id='live-update-graph1'), html.Div(id='intermediate', style={'display':'none'}),
                 html.Div(id='GuardarDiv', style={'textAlign': 'center', 'color': colors['text']}, children=[
-                html.Button('Guardar datos / Dejar de guardar', id='guardar', n_clicks=0, className="button button-primary"),
+                html.Button('Guardar datos / Dejar de guardar', id='guardar', n_clicks=1, className="button button-primary"),
                 # html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
                 html.Div(id='indicativoGuardar', children=['No guardando']),
                 dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')]),
@@ -135,7 +135,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                                 html.Br(),
                                 dcc.Slider(id='Razon1', min=0, max=1, step=0.05, marks={0: '0', 1: '1'}, tooltip={'always_visible':False}, value=0.7)]),
                             html.Div(id='Razon2Div', style={'paddingTop':'20px'}, className='six columns', children=[
-                                html.Label(id='Razon2Label',children='Razon 2'),
+                                html.Label(id='Razon2Label', children='Razon 2'),
                                 html.Br(),
                                 dcc.Slider(id='Razon2', min=0, max=1, step=0.05, marks={0: '0', 1: '1'}, tooltip={'always_visible':False}, value=0.6)])
                         ]),
@@ -209,11 +209,11 @@ def alarm_text(n):
 # save callback function
 @app.callback(Output('indicativoGuardar', 'children'), [Input('guardar', 'n_clicks')])
 def save(save_clicks):
-    if system.event_save % 2 != 0:
+    if system.event_save == 1:
         system.event_save = 0
         return 'Guardando'
     else:
-        system.event_save += 1
+        system.event_save = 1
         return 'No guardando'
 
 # heights update callback function
@@ -395,4 +395,5 @@ def controller_output(heights, choice, fixed1, fixed2, kp, ki, kd, kw, SPT1, SPT
 
     return fig
 
-app.run_server(debug=False)
+if __name__ == '__main__':
+    app.run_server(debug=False)
