@@ -107,7 +107,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                 # html.Button('Dejar de Guardar', id='noguardar', n_clicks=0),
                 html.Div(id='indicativoGuardar', children=['No guardando']),
                 dcc.RadioItems(id='Formato', options=[{'label': '.csv', 'value': 'csv'}, {'label':'.json', 'value': 'json'}, {'label':'.pickle', 'value': 'pickle'}], value='csv')]),
-                html.H2(id='AlarmaTexto', style={'backgroundColor': '#006400','textAlign':'center', 'color': colors['text'], 'padding':'35px', 'margin':'40px'}, children=['Alarma Inactiva']),
+                html.H2(id='AlarmaTexto', children=['Alarma Inactiva']),
                 html.H2('Válvulas', style={'textAlign': 'center', 'color': colors['text']}),
                 html.Div(dcc.Graph(id='live-update-graph2')),
                 html.Div(id='Modo',style={'textAlign': 'center', 'color': colors['text']}, children=[
@@ -184,14 +184,15 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 )
 
 # alarm color callback function
-@app.callback(Output('Alarma', 'style'), [Input('interval-component', 'n_intervals')])
+@app.callback(Output('AlarmaTexto', 'style'), [Input('interval-component', 'n_intervals')])
 def alarm_color(n):
     if system.event_color != 0:
         color = '#EF2D56'
     else:
         color = '#5FAD56'
     system.event_color = 0
-    style = {'backgroundColor': color, 'font-family': fonts['text'], 'color': colors['text'],  'width': '80%', 'height': '70px', 'paddingTop': '15px', 'margin': 'auto'}
+    style={'backgroundColor': color,'textAlign':'center', 'color': colors['text'], 'padding':'35px', 'margin':'40px'}
+    # style = {'backgroundColor': color, 'color': colors['text']}
     return style
 
 # alarm text callback function
