@@ -171,6 +171,10 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
                                     html.Td('Anti wind-up'),
                                     html.Td(dcc.Input(id='kw',placeholder='Ingrese un valor', type='text', value='0.1'))
                                 ]),
+                                html.Tr([
+                                    html.Td('Filtro derivativo'),
+                                    html.Td(dcc.Input(id='kn',placeholder='Ingrese un valor', type='text', value='0.1'))
+                                ]),
                             ]),
                     ])
                 ]),
@@ -235,8 +239,8 @@ def update_text(heights):
     ]
 
 # heights graph update callback function
-@app.callback(Output('live-update-graph1', 'figure'), [Input('intermediate', 'children')])
-def update_graph(heights):
+@app.callback(Output('live-update-graph1', 'figure'), [Input('intermediate', 'children')], [State('Eleccion', 'value')])
+def update_graph(heights, choice):
     heights = json.loads(heights)
     # save last height to height history
     system.h1.append(heights['h1'])
@@ -252,8 +256,9 @@ def update_graph(heights):
     plot2 = go.Scatter(x=list(system.ts), y=list(system.h2), name='Tanque 2', mode='lines+markers')
     plot3 = go.Scatter(x=list(system.ts), y=list(system.h3), name='Tanque 3', mode='lines+markers')
     plot4 = go.Scatter(x=list(system.ts), y=list(system.h4), name='Tanque 4', mode='lines+markers')
-    plot1ref = go.Scatter(x=list(system.ts), y=list(system.spt1), name='Referencia 1', mode='lines')
-    plot2ref = go.Scatter(x=list(system.ts), y=list(system.spt2), name='Referencia 2', mode='lines')
+    if choice == 'Automatico':
+        plot1ref = go.Scatter(x=list(system.ts), y=list(system.spt1), name='Referencia 1', mode='lines')
+        plot2ref = go.Scatter(x=list(system.ts), y=list(system.spt2), name='Referencia 2', mode='lines')
 
     # create figure to fit the four plots
     fig = plotly.tools.make_subplots(rows=2, cols=2, vertical_spacing=0.2,
@@ -268,9 +273,10 @@ def update_graph(heights):
     
     # set plot positions in figure
     fig.append_trace(plot1, 1, 1)
-    fig.append_trace(plot1ref, 1, 1)
     fig.append_trace(plot2, 1, 2)
-    fig.append_trace(plot2ref, 1, 2)
+    if choice == 'Automatico':
+        fig.append_trace(plot1ref, 1, 1)
+        fig.append_trace(plot2ref, 1, 2)
     fig.append_trace(plot3, 2, 1)
     fig.append_trace(plot4, 2, 2)
 
@@ -313,11 +319,11 @@ def update_setpoint_2(value):
               [State('Eleccion', 'value'),
                 State('ManualFijo1', 'value'), State('ManualFijo2', 'value'),
                 State('kp', 'value'),
-                State('ki', 'value'), State('kd', 'value'), State('kw','value'),
+                State('ki', 'value'), State('kd', 'value'), State('kw','value'), State('kn','value'),
                 State('SPT1', 'value'), State('SPT2', 'value'),
                 State('indicativoGuardar', 'children'), State('Formato', 'value'),
                 State('Razon1', 'value'), State('Razon2', 'value')])
-def controller_output(heights, choice, fixed1, fixed2, kp, ki, kd, kw, SPT1, SPT2, saving, formatting, rate_1, rate_2):
+def controller_output(heights, choice, fixed1, fixed2, kp, ki, kd, kw, kn, SPT1, SPT2, saving, formatting, rate_1, rate_2):
     heights = json.loads(heights)
     # set current time and save to historical times
     now = datetime.datetime.now()
@@ -342,6 +348,7 @@ def controller_output(heights, choice, fixed1, fixed2, kp, ki, kd, kw, SPT1, SPT
         system.pid1.ki = system.pid2.ki = float(ki)
         system.pid1.kd = system.pid2.kd = float(kd)
         system.pid1.kw = system.pid2.kw = float(kw)
+        system.pid1.kw = system.pid2.kw = float(kn)
 
         # update valve rates based on pid controller output
         v1 = system.pid1.update(heights['h1'])
